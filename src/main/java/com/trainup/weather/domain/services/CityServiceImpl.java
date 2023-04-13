@@ -15,6 +15,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class CityServiceImpl implements CityService {
@@ -34,9 +36,35 @@ public class CityServiceImpl implements CityService {
         return true;
     }
 
-    @Override
-    public void updateCity(String cityName, String countryCode) {
+    private boolean updateCity(Integer id) throws InterruptedException, IOException, JSONException, URISyntaxException {
+        boolean isUpdated = false;
+        Optional<City> city = cityRepository.findById(id);
+        if (city.isPresent() && (city.get().getLongitude() == null || city.get().getLatitude() == null)) {
+            updateCoordinates(city.get());
+            cityRepository.save(city.get());
+            isUpdated = true;
+        }
+        return isUpdated;
+    }
 
+    public int updateCities() {
+        AtomicInteger cityCounter = new AtomicInteger();
+        cityRepository.findAll().forEach(city -> {
+            try {
+                if (updateCity(city.getId())) {
+                    cityCounter.addAndGet(1);
+                }
+            } catch (InterruptedException | IOException | JSONException | URISyntaxException e) {
+                e.printStackTrace();
+            }
+        });
+        return cityCounter.get();
+    }
+
+    private void updateCoordinates(City city) throws InterruptedException, IOException, JSONException, URISyntaxException {
+            Coordinates coordinates = getCoordinates(city.getName(), city.getCountry());
+            city.setLatitude(coordinates.getLatitude());
+            city.setLongitude(coordinates.getLongitude());
     }
 
     private Coordinates getCoordinates(String cityName, String countryCode) throws URISyntaxException, IOException, InterruptedException, JSONException {

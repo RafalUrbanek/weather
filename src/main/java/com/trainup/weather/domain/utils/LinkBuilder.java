@@ -16,16 +16,29 @@ public class LinkBuilder {
             }
         }
         sb.append("&limit=1&appid=3ced6b0d7c2c0bab53979a5a84f729db");
-        return new URI(sb.toString());
+
+        return new URI(replaceSpaces(sb));
     }
 
     public static URI uriWeatherConstructor (Double lat, Double lon) throws URISyntaxException {
-        StringBuffer sb = new StringBuffer();
-        sb.append("https://api.openweathermap.org/data/2.5/weather?lat=");
-        sb.append(lat);
-        sb.append("&lon=");
-        sb.append(lon);
-        sb.append("&appid=3ced6b0d7c2c0bab53979a5a84f729db");
-        return new URI(sb.toString());
+        String sb = "https://api.openweathermap.org/data/2.5/weather?lat="
+                + lat
+                + "&lon="
+                + lon
+                + "&appid=3ced6b0d7c2c0bab53979a5a84f729db";
+        return new URI(sb);
+    }
+
+    private static String replaceSpaces(StringBuffer text) {
+        StringBuilder fixedText = new StringBuilder();
+
+        for(Character c : text.toString().toCharArray()) {
+            if (c.equals(' ')) {
+                fixedText.append("_");
+            } else {
+                fixedText.append(c);
+            }
+        }
+        return fixedText.toString();
     }
 }
