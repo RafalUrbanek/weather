@@ -1,7 +1,5 @@
 package com.trainup.weather.domain.controllers;
 
-import com.trainup.weather.domain.Dto.WeatherDto;
-import com.trainup.weather.domain.schedulers.CityUpdater;
 import com.trainup.weather.domain.services.CityService;
 import com.trainup.weather.domain.services.WeatherService;
 import org.json.JSONException;
@@ -25,13 +23,8 @@ public class WeatherController {
         cityService.addCity(cityName, countryCode);
     }
 
-    @PostMapping("/scheduled")
-    public void updateCityCoordinates() {
-        CityUpdater.start(cityService);
-    }
-
-    @GetMapping("/weather")
-    public void updateWeather(Double latitude, Double longitude) throws URISyntaxException, IOException, InterruptedException, JSONException {
-        weatherService.updateWeather(latitude, longitude);
+    @DeleteMapping("/city")
+    public void deleteCity(String cityName, String countryCode) {
+        cityService.deleteCity(cityName, countryCode);
     }
 }

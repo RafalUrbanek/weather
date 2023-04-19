@@ -11,12 +11,15 @@ import java.time.LocalDate;
 @Setter
 @Entity
 @Table(name = "WEATHER")
-public class WeatherReport implements Serializable {
+public class Weather implements Serializable {
 
     @Id
     @Column
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    Double Id;
+    Integer WeatherId;
+
+    @ManyToOne
+    City city;
 
     @Column
     Double temperature;

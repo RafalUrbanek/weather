@@ -9,5 +9,5 @@ public interface CityService {
 
     boolean addCity(String CityName, String CityCode) throws URISyntaxException, IOException, InterruptedException, JSONException;
 
-    int updateCities();
+    void deleteCity (String cityName, String countryCode);
 }

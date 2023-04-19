@@ -1,7 +1,12 @@
 package com.trainup.weather.domain.repositories;
 
-import com.trainup.weather.domain.entities.WeatherReport;
+import com.trainup.weather.domain.entities.City;
+import com.trainup.weather.domain.entities.Weather;
 import org.springframework.data.repository.CrudRepository;
 
-public interface WeatherRepository extends CrudRepository<WeatherReport, Integer> {
+import java.time.LocalDate;
+
+public interface WeatherRepository extends CrudRepository<Weather, Integer> {
+
+    Weather findWeatherByDateAndCity(LocalDate date, City city);
 }

@@ -1,13 +1,17 @@
 package com.trainup.weather.domain.services;
 
 import com.trainup.weather.domain.Dto.WeatherDto;
-import com.trainup.weather.domain.entities.WeatherReport;
+import com.trainup.weather.domain.entities.City;
+import com.trainup.weather.domain.entities.Weather;
+import com.trainup.weather.domain.repositories.CityRepository;
 import com.trainup.weather.domain.repositories.WeatherRepository;
+import com.trainup.weather.domain.utils.Coordinates;
 import com.trainup.weather.domain.utils.LinkBuilder;
 import com.trainup.weather.domain.utils.TempConverter;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -15,8 +19,10 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.sql.Time;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 public class WeatherServiceImpl implements WeatherService {
@@ -24,20 +30,38 @@ public class WeatherServiceImpl implements WeatherService {
     @Autowired
     WeatherRepository weatherRepository;
 
-    @Override
-    public void updateWeather(Double latitude, Double longitude) throws InterruptedException, IOException, JSONException, URISyntaxException {
-        WeatherReport weatherReport = new WeatherReport();
-        WeatherDto weather = getWeather(latitude, longitude);
-        weatherReport.setDate(LocalDate.now());
-        weatherReport.setTemperature(weather.getTemperature());
-        weatherReport.setWindSpeed(weather.getWindSpeed());
-        weatherRepository.save(weatherReport);
+    @Autowired
+    CityRepository cityRepository;
+
+    @Scheduled(fixedDelay = 30000)
+    public void updateWeathers() {
+        cityRepository.findAll().forEach(city -> {
+            try {
+                updateWeather(city.getId());
+            } catch (InterruptedException | IOException | JSONException | URISyntaxException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
-    private WeatherDto getWeather(Double latitude, Double longitude) throws URISyntaxException, IOException, InterruptedException, JSONException {
+    public void updateWeather(Integer cityId) throws InterruptedException, IOException, JSONException, URISyntaxException {
+        City city = cityRepository.findById(cityId).get();
+        Weather weather = new Weather();
+        if (weatherRepository.findWeatherByDateAndCity(LocalDate.now(), city) == null) {
+            WeatherDto weatherDto = getWeather(city);
+            weather.setDate(LocalDate.now());
+            weather.setTemperature(weatherDto.getTemperature());
+            weather.setWindSpeed(weatherDto.getWindSpeed());
+            weather.setCity(city);
+            weatherRepository.save(weather);
+            System.out.println("updated weather for city: "  + city.getName());
+        }
+    }
+
+    private WeatherDto getWeather(City city) throws URISyntaxException, IOException, InterruptedException, JSONException {
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(LinkBuilder.uriWeatherConstructor(latitude, longitude))
+                .uri(LinkBuilder.uriWeatherConstructor(city.getLatitude(), city.getLongitude()))
                 .timeout(Duration.ofSeconds(5))
                 .GET()
                 .build();
@@ -50,9 +74,19 @@ public class WeatherServiceImpl implements WeatherService {
     private static WeatherDto getWeatherDto(JSONObject response) throws JSONException {
         return WeatherDto.builder()
                 .temperature(TempConverter.convertKToC(response.getJSONObject("main").getDouble("temp")))
-                .humidity(response.getJSONObject("main").getInt("humidity"))
-                .pressure(response.getJSONObject("main").getInt("pressure"))
                 .windSpeed(response.getJSONObject("wind").getDouble("speed"))
                 .build();
+    }
+
+    @Override
+    public City bestWeather(Coordinates coordinates) {
+        //TODO
+        return null;
+    }
+
+    @Override
+    public City bestWeather(String cityName, String countryName) {
+        //TODO
+        return null;
     }
 }

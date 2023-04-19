@@ -1,6 +1,5 @@
 package com.trainup.weather.domain.entities;
 
-
 import lombok.Getter;
 import lombok.Setter;
 

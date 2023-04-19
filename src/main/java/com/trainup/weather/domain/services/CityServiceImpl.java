@@ -7,8 +7,10 @@ import com.trainup.weather.domain.utils.LinkBuilder;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -16,7 +18,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class CityServiceImpl implements CityService {
@@ -36,29 +37,33 @@ public class CityServiceImpl implements CityService {
         return true;
     }
 
+    @Override
+    @Transactional
+    public void deleteCity(String cityName, String countryCode) {
+        cityRepository.deleteCityByNameAndCountry(cityName, countryCode);
+    }
+
     private boolean updateCity(Integer id) throws InterruptedException, IOException, JSONException, URISyntaxException {
-        boolean isUpdated = false;
         Optional<City> city = cityRepository.findById(id);
         if (city.isPresent() && (city.get().getLongitude() == null || city.get().getLatitude() == null)) {
             updateCoordinates(city.get());
             cityRepository.save(city.get());
-            isUpdated = true;
+            System.out.println("updated city: " + city.get().getName());
+            return true;
+        } else {
+            return false;
         }
-        return isUpdated;
     }
 
-    public int updateCities() {
-        AtomicInteger cityCounter = new AtomicInteger();
+    @Scheduled(fixedDelay = 10000)
+    public void updateCities() {
         cityRepository.findAll().forEach(city -> {
             try {
-                if (updateCity(city.getId())) {
-                    cityCounter.addAndGet(1);
-                }
+                updateCity(city.getId());
             } catch (InterruptedException | IOException | JSONException | URISyntaxException e) {
                 e.printStackTrace();
             }
         });
-        return cityCounter.get();
     }
 
     private void updateCoordinates(City city) throws InterruptedException, IOException, JSONException, URISyntaxException {
