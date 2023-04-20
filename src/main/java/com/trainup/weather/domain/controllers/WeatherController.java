@@ -4,7 +4,10 @@ import com.trainup.weather.domain.services.CityService;
 import com.trainup.weather.domain.services.WeatherService;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -13,10 +16,10 @@ import java.net.URISyntaxException;
 public class WeatherController {
 
     @Autowired
-    CityService cityService;
+    private CityService cityService;
 
     @Autowired
-    WeatherService weatherService;
+    private WeatherService weatherService;
 
     @PostMapping("/city")
     public void addCity(String cityName, String countryCode) throws URISyntaxException, IOException, InterruptedException, JSONException {
@@ -26,5 +29,10 @@ public class WeatherController {
     @DeleteMapping("/city")
     public void deleteCity(String cityName, String countryCode) {
         cityService.deleteCity(cityName, countryCode);
+    }
+
+    @GetMapping("/city")
+    public String getBestWeatherCity() {
+        return weatherService.bestWeatherCity();
     }
 }

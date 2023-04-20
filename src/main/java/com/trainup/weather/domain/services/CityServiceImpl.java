@@ -23,10 +23,10 @@ import java.util.Optional;
 public class CityServiceImpl implements CityService {
 
     @Autowired
-    CityRepository cityRepository;
+    private CityRepository cityRepository;
 
     @Override
-    public boolean addCity(String cityName, String countryCode) throws InterruptedException, URISyntaxException, JSONException, IOException {
+    public void addCity(String cityName, String countryCode) throws InterruptedException, URISyntaxException, JSONException, IOException {
         Coordinates coordinates = getCoordinates(cityName, countryCode);
         City city = new City();
         city.setName(cityName);
@@ -34,7 +34,6 @@ public class CityServiceImpl implements CityService {
         city.setLatitude(coordinates.getLatitude());
         city.setLongitude(coordinates.getLongitude());
         cityRepository.save(city);
-        return true;
     }
 
     @Override
@@ -43,15 +42,12 @@ public class CityServiceImpl implements CityService {
         cityRepository.deleteCityByNameAndCountry(cityName, countryCode);
     }
 
-    private boolean updateCity(Integer id) throws InterruptedException, IOException, JSONException, URISyntaxException {
+    private void updateCity(Integer id) throws InterruptedException, IOException, JSONException, URISyntaxException {
         Optional<City> city = cityRepository.findById(id);
         if (city.isPresent() && (city.get().getLongitude() == null || city.get().getLatitude() == null)) {
             updateCoordinates(city.get());
             cityRepository.save(city.get());
             System.out.println("updated city: " + city.get().getName());
-            return true;
-        } else {
-            return false;
         }
     }
 

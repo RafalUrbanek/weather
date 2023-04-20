@@ -9,4 +9,6 @@ import java.time.LocalDate;
 public interface WeatherRepository extends CrudRepository<Weather, Integer> {
 
     Weather findWeatherByDateAndCity(LocalDate date, City city);
+
+    Weather findByCityAndDate(City city, LocalDate date);
 }

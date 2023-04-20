@@ -7,7 +7,7 @@ import java.net.URISyntaxException;
 
 public interface CityService {
 
-    boolean addCity(String CityName, String CityCode) throws URISyntaxException, IOException, InterruptedException, JSONException;
+    void addCity(String cityName, String cityCode) throws URISyntaxException, IOException, InterruptedException, JSONException;
 
-    void deleteCity (String cityName, String countryCode);
+    void deleteCity(String cityName, String countryCode);
 }
