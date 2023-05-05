@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ResourceBundle;
 
+// wyciągnąć do impl
 public class LinkBuilder {
 
     static ResourceBundle res = ResourceBundle.getBundle("secrets");
@@ -30,6 +31,7 @@ public class LinkBuilder {
         return new URI(sb.toString());
     }
 
+    // wywalić, zamienić replaceAll
     private static String replaceSpaces(StringBuffer text) {
         StringBuilder fixedText = new StringBuilder();
 

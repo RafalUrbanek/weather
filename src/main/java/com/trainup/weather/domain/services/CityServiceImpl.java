@@ -39,6 +39,8 @@ public class CityServiceImpl implements CityService {
     @Override
     @Transactional
     public void deleteCity(String cityName, String countryCode) {
+        // wyciągnąć id miasta i zwykle delete
+        // usunąć wszystkie rekordy weather przy usunięciu miasta
         cityRepository.deleteCityByNameAndCountry(cityName, countryCode);
     }
 
@@ -51,7 +53,7 @@ public class CityServiceImpl implements CityService {
         }
     }
 
-    @Scheduled(fixedDelay = 10000)
+    @Scheduled(fixedDelay = 10000) // dodać drugi parametr (startowy)
     public void updateCities() {
         cityRepository.findAll().forEach(city -> {
             try {
@@ -70,6 +72,7 @@ public class CityServiceImpl implements CityService {
 
     private Coordinates getCoordinates(String cityName, String countryCode) throws URISyntaxException, IOException, InterruptedException, JSONException {
 
+        // użyć REST template
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(LinkBuilder.uriGeoConstructor(cityName, countryCode))
                 .timeout(Duration.ofSeconds(5))
